@@ -43,6 +43,13 @@
         .botao:hover {
             background-color: #e04e2c;
         }
+        .lista-pedidos {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
     </style>
 </head>
 <body>
@@ -50,16 +57,52 @@
     <div class="container">
         <div class="prato">
             <h2>Prato 1 - Arroz, Feijão e Frango</h2>
-            <button class="botao">Pedir / Retirar</button>
+            <button class="botao" onclick="fazerPedido('Arroz, Feijão e Frango')">Pedir / Retirar</button>
         </div>
         <div class="prato">
             <h2>Prato 2 - Macarrão ao Molho</h2>
-            <button class="botao">Pedir / Retirar</button>
+            <button class="botao" onclick="fazerPedido('Macarrão ao Molho')">Pedir / Retirar</button>
         </div>
         <div class="prato">
             <h2>Prato 3 - Salada Completa</h2>
-            <button class="botao">Pedir / Retirar</button>
+            <button class="botao" onclick="fazerPedido('Salada Completa')">Pedir / Retirar</button>
         </div>
+
+        <h3>Pedidos Recentes:</h3>
+        <ul id="listaPedidos" class="lista-pedidos"></ul>
     </div>
+
+    <script>
+        function fazerPedido(prato) {
+            fetch("http://localhost:3000/pedidos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prato: prato })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensagem || data.erro);
+                carregarPedidos();
+            })
+            .catch(error => console.error("Erro ao fazer pedido:", error));
+        }
+
+        function carregarPedidos() {
+            fetch("http://localhost:3000/pedidos")
+                .then(response => response.json())
+                .then(data => {
+                    let lista = document.getElementById("listaPedidos");
+                    lista.innerHTML = "";
+                    data.forEach(pedido => {
+                        let item = document.createElement("li");
+                        item.textContent = `${pedido.prato} - ${new Date(pedido.horario).toLocaleString()}`;
+                        lista.appendChild(item);
+                    });
+                })
+                .catch(error => console.error("Erro ao carregar pedidos:", error));
+        }
+
+        carregarPedidos();
+    </script>
 </body>
 </html>
